@@ -8,7 +8,7 @@ UBOOT=`pwd`/u-boot/
 pushd ${UBOOT}
 #Check if the release version number is set, if not, we are building a dev version.
 if [ -z ${RELEASE_VERSION+x} ]; then
-	RELEASE_VERSION=0.0.0
+	RELEASE_VERSION=9999.99.99
 fi
 BUILDCONFIG="opinicus_v1"
 CROSS_COMPILE="arm-none-eabi-"
