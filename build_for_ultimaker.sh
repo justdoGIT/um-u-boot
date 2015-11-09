@@ -23,7 +23,7 @@ mkdir -p debian/boot
 mkdir -p debian/DEBIAN
 cp u-boot-sunxi-with-spl.bin debian/boot/
 cat > debian/DEBIAN/control <<-EOT
-Package: uboot-${RELEASE_VERSION}
+Package: u-boot-sunxi
 Source: linux-upstream
 Version: ${RELEASE_VERSION}
 Architecture: armhf
