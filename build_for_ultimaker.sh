@@ -34,6 +34,5 @@ Description: u-boot image with spl for A20 CPU.
 EOT
 
 #Build the debian package
-fakeroot dpkg-deb --build "debian"
-mv debian.deb ../u-boot-sunxi-${RELEASE_VERSION}.deb
+fakeroot dpkg-deb --build "debian" ../u-boot-sunxi-${RELEASE_VERSION}.deb
 popd
