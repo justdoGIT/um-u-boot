@@ -6,7 +6,10 @@
 CROSS_COMPILE=$(printenv CROSS_COMPILE)
 if [ ${CROSS_COMPILE+x} ]; then
     _CROSS_COMPILE=`which arm-none-eabi-gcc`
-    if [ -z ${_CROSS_COMPILE} ]; then
+    if [ ${_CROSS_COMPILE} ]; then
+        CROSS_COMPILE="arm-none-eabi-"
+        export CROSS_COMPILE=${CROSS_COMPILE}
+    else
         _CROSS_COMPILE=`which arm-linux-gnueabihf-gcc`
         if [ ${_CROSS_COMPILE} ]; then
             CROSS_COMPILE="arm-linux-gnueabihf-"
@@ -14,7 +17,7 @@ if [ ${CROSS_COMPILE+x} ]; then
         else
             echo "No suiteable cross-compiler found."
             echo "One can be set explicitly via the environment variable CROSS_COMPILE='arm-linux-gnueabihf-' for example."
-	    exit
+	        exit
         fi
     fi
 fi
