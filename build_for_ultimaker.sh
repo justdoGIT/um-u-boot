@@ -34,7 +34,7 @@ set -u
 UBOOT=`pwd`/u-boot/
 
 # Which bootloader config to build.
-BUILDCONFIG="opinicus_v1"
+BUILDCONFIG="opinicus"
 
 # Setup internal variables.
 UCONFIG=`pwd`/configs/${BUILDCONFIG}_config
