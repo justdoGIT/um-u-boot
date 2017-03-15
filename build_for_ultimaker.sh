@@ -30,35 +30,63 @@ fi
 set -e
 set -u
 
+# Which bootloader to build.
 UBOOT=`pwd`/u-boot/
 
-pushd ${UBOOT}
-#Check if the release version number is set, if not, we are building a dev version.
-if [ -z ${RELEASE_VERSION+x} ]; then
-	RELEASE_VERSION=9999.99.99
-fi
+# Which bootloader config to build.
 BUILDCONFIG="opinicus_v1"
 
-#Build the actual bootloader
-ARCH=arm CROSS_COMPILE="${CROSS_COMPILE}" make "${BUILDCONFIG}_defconfig"
-ARCH=arm CROSS_COMPILE="${CROSS_COMPILE}" make
+# Setup internal variables.
+UCONFIG=`pwd`/configs/${BUILDCONFIG}_config
+UBOOT_BUILD=`pwd`/_build_armhf/${BUILDCONFIG}-u-boot
 
-#Setup the debian package data
-rm -rf debian
-mkdir -p debian/boot
-mkdir -p debian/DEBIAN
-cp u-boot-sunxi-with-spl.bin debian/boot/
-cat > debian/DEBIAN/control <<-EOT
-Package: u-boot-sunxi
-Source: linux-upstream
-Version: ${RELEASE_VERSION}
-Architecture: armhf
-Maintainer: Anonymous <root@monolith.ultimaker.com>
-Section: kernel
-Priority: optional
-Description: u-boot image with spl for A20 CPU.
-EOT
+# Initialize repositories
+git submodule init
+git submodule update
 
-#Build the debian package
-fakeroot dpkg-deb --build "debian" ../u-boot-sunxi-${RELEASE_VERSION}.deb
-popd
+u-boot_build() {
+	#Check if the release version number is set, if not, we are building a dev version.
+	if [ -z ${RELEASE_VERSION+x} ]; then
+		RELEASE_VERSION=9999.99.99
+	fi
+
+	# Prepare the build environment
+	mkdir -p ${UBOOT_BUILD}
+	pushd ${UBOOT}
+
+	# Build the u-boot image file
+	ARCH=arm CROSS_COMPILE="${CROSS_COMPILE}" make O=${UBOOT_BUILD} KCONFIG_CONFIG=${UCONFIG}
+	popd
+
+	# Build the debian package data
+	DEB_DIR=`pwd`/debian
+
+	rm -r ${DEB_DIR} 2> /dev/null || true
+	mkdir -p "${DEB_DIR}/boot"
+	cp ${UBOOT_BUILD}/u-boot-sunxi-with-spl.bin "${DEB_DIR}/boot/"
+
+	mkdir -p ${DEB_DIR}/DEBIAN
+	cat > debian/DEBIAN/control <<-EOT
+		Package: um-u-boot
+		Conflicts: u-boot-sunxi
+		Replaces: u-boot-sunxi
+		Version: ${RELEASE_VERSION}
+		Architecture: armhf
+		Maintainer: Anonymous <root@monolith.ultimaker.com>
+		Section: admin
+		Priority: optional
+		Homepage: http://www.denx.de/wiki/U-Boot/
+		Description: u-boot image with spl for the Olimex OLinuXino Lime2 eMMC.
+	EOT
+
+	# Build the debian package
+	fakeroot dpkg-deb --build "${DEB_DIR}" um-u-boot-${RELEASE_VERSION}.deb
+}
+
+if [ ${#} -gt 0 ]; then
+	pushd ${UBOOT}
+	ARCH=arm make O=${UBOOT_BUILD} KCONFIG_CONFIG=${UCONFIG} "${@}"
+	popd
+else
+	u-boot_build
+fi
