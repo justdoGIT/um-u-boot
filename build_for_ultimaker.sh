@@ -65,6 +65,14 @@ u-boot_build() {
 	mkdir -p "${DEB_DIR}/boot"
 	cp ${UBOOT_BUILD}/u-boot-sunxi-with-spl.bin "${DEB_DIR}/boot/"
 
+	# Prepare the u-boot environment
+	for env in $(find env/ -name '*.env' -exec basename {} \;); do
+		echo "Building environment for ${env%.env}"
+		mkenvimage -s 131072 -p 0x00 -o ${UBOOT_BUILD}/${env}.bin env/${env}
+		chmod a+r ${UBOOT_BUILD}/${env}.bin
+		cp env/${env} ${UBOOT_BUILD}/${env}.bin "${DEB_DIR}/boot/"
+	done
+
 	mkdir -p ${DEB_DIR}/DEBIAN
 	cat > debian/DEBIAN/control <<-EOT
 		Package: um-u-boot
