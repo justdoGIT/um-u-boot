@@ -46,9 +46,7 @@ git submodule update
 
 u-boot_build() {
 	#Check if the release version number is set, if not, we are building a dev version.
-	if [ -z ${RELEASE_VERSION+x} ]; then
-		RELEASE_VERSION=9999.99.99
-	fi
+	RELEASE_VERSION=${RELEASE_VERSION:-9999.99.99}
 
 	# Prepare the build environment
 	mkdir -p ${UBOOT_BUILD}
